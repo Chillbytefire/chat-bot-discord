@@ -1,5 +1,4 @@
 import os
-import requests
 import discord
 import logging
 import random

@@ -79,7 +79,7 @@ async def on_message(message):
         await message.reply(f"{random.randint(0,10)}/10")
         return
 
-    if query.startswith("who will win"):
+    if query.startswith("who will win") or query.startswith("who would win"):
         matchup = query[len("who will win "):]
     
         choices = [c.strip() for c in matchup.split(" or ") if c.strip()]
@@ -105,6 +105,37 @@ async def on_message(message):
 
         await message.reply(random.choice(responses))
         return
+
+    if query.startswith("no embed perms"):
+
+        if not message.reference:
+            await message.reply("reply to a message first bro")
+            return
+
+        try:
+            replied = await message.channel.fetch_message(
+                message.reference.message_id
+            )
+
+            if not replied.content:
+                await message.reply("that message got no text")
+                return
+
+            files = [
+                await attachment.to_file()
+                for attachment in replied.attachments
+            ]
+
+            await message.channel.send(
+                replied.content,
+                files=files
+            )
+
+        except Exception as e:
+            print(e)
+            await message.reply("something exploded :thumbsup:")
+
+        return        
 
     await message.reply("you called?")
 

@@ -167,7 +167,7 @@ async def on_message(message):
                 message.reference.message_id
             )
 
-            if not replied.content:
+            if not replied.content  and not replied.attachments:
                 await message.reply("that message got no text")
                 return
 

@@ -77,7 +77,7 @@ async def on_message(message):
     cooldown = dr_who_cooldowns.get(guild_id, 0)
 
     if now >= cooldown and random.random() < DR_WHO_CHANCE:
-        await message.channel.send(random.choice(DR_WHO_LINES))
+        await message.reply(random.choice(DR_WHO_LINES), mention_author=False)
         await message.channel.send(random.choice(DR_WHO_GIFS))
 
         dr_who_cooldowns[guild_id] = now + random.randint(30, 60)

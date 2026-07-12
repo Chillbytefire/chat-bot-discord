@@ -131,7 +131,7 @@ async def on_message(message):
         await message.reply(rng.choice(responses))
         return
 
-    if query == "":
+    if query == "chat":
         await message.reply("you called?")
         return
     

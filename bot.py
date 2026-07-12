@@ -2,6 +2,7 @@ import os
 import discord
 import logging
 import random
+import time
 from flask import Flask
 from threading import Thread
 
@@ -29,6 +30,33 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
+# DR WHOOOOOOOOOOOOOOO
+
+DR_WHO_CHANCE = 0.037
+
+dr_who_cooldowns = {}
+
+DR_WHO_LINES = [
+    "IS THAT A DOCTOR WHO REFERENCE??",
+    "HOLY SHIT DOCTOR WHO",
+    "EVERYTHING IS A DOCTOR WHO REFERENCE",
+    "THE DOCTOR MENTIONED 🗣️🗣️",
+    "WIBBLY WOBBLY TIMEY WIMEY",
+]
+
+DR_WHO_GIFS = [
+    "https://tenor.com/view/dr-who-doctor-who-matt-smith-points-pointing-gif-4446574",
+    "https://tenor.com/view/call-me-doctor-who-matt-smith-gif-3564073",
+    "https://klipy.com/gifs/doctor-who-clara-oswald-22",
+    "https://tenor.com/view/matt-smith-doctor-who-regret-i-regret-nothing-idc-gif-5485932",
+    "https://tenor.com/view/thumbs-up-eleventh-doctor-doctor-who-matt-smith-smile-gif-17095333",
+    "https://tenor.com/view/david-tennant-brilliant-happy-doctor-who-gif-3411551",
+    "https://tenor.com/view/allonsy-doctor-who-10th-gif-5990793",
+    "https://tenor.com/view/doctor-who-dr-who-matt-smith-throne-shrug-gif-5136242",
+    "https://tenor.com/view/doctor-who-clara-gif-21352468",
+    "https://tenor.com/view/doctor-who-the-doctor-doctor-12th-doctor-12-gif-10085395425960539705",
+]
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
@@ -40,7 +68,22 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    if message.guild is None:
+        return
+
+    guild_id = message.guild.id
+    now = time.time()
+
+    cooldown = dr_who_cooldowns.get(guild_id, 0)
+
+    if now >= cooldown and random.random() < DR_WHO_CHANCE:
+        await message.channel.send(random.choice(DR_WHO_LINES))
+        await message.channel.send(random.choice(DR_WHO_GIFS))
+
+        dr_who_cooldowns[guild_id] = now + random.randint(30, 60)
+
     words = message.content.lower().split()
+
 
     if not words:
         return
@@ -80,8 +123,15 @@ async def on_message(message):
         return
 
     if query.startswith("who will win") or query.startswith("who would win"):
-        matchup = query[len("who will win "):]
-    
+
+        if query.startswith("who will win "):
+            matchup = query[len("who will win "):]
+        elif query.startswith("who would win "):
+            matchup = query[len("who would win "):]
+        else:
+            await message.reply("nigga learn how to use de fukin bot")
+            return
+
         choices = [c.strip() for c in matchup.split(" or ") if c.strip()]
 
         if len(choices) < 2:
@@ -117,7 +167,7 @@ async def on_message(message):
                 message.reference.message_id
             )
 
-            if not replied.content:
+            if not replied.content  and not replied.attachments:
                 await message.reply("that message got no text")
                 return
 

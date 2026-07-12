@@ -3,6 +3,7 @@ import discord
 import logging
 import random
 import time
+import hashlib
 from flask import Flask
 from threading import Thread
 
@@ -57,6 +58,17 @@ DR_WHO_GIFS = [
     "https://tenor.com/view/doctor-who-the-doctor-doctor-12th-doctor-12-gif-10085395425960539705",
 ]
 
+#PSEUDO random
+
+WEEK_SECONDS = 7 * 24 * 60 * 60
+
+def get_rng(key: str):
+    week = int(time.time() // WEEK_SECONDS)
+    seed = f"{week}:{key.lower()}"
+    h = hashlib.sha256(seed.encode()).digest()
+    return random.Random(h)
+
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
@@ -109,21 +121,33 @@ async def on_message(message):
     query = query.strip()
 
     if query.startswith("is this real"):
-        
+        key = "real:" + " ".join(query.split()).lower()
+        rng = get_rng(key)
         responses = [
             "Real.",
             "Not real."
         ]
 
-        await message.reply(random.choice(responses))
+        await message.reply(rng.choice(responses))
+        return
+
+    if query == "":
+        await message.reply("you called?")
         return
     
     if query.startswith("rate"):
-        await message.reply(f"{random.randint(0,10)}/10")
+        thing = " ".join(query[4:].split()).lower()
+
+        if not thing:
+            await message.reply("rate what bro")
+            return
+
+        rng = get_rng("rate:" + thing)
+        await message.reply(f"{rng.randint(0,10)}/10")
         return
 
     if query.startswith("who will win") or query.startswith("who would win"):
-
+       
         if query.startswith("who will win "):
             matchup = query[len("who will win "):]
         elif query.startswith("who would win "):
@@ -133,15 +157,22 @@ async def on_message(message):
             return
 
         choices = [c.strip() for c in matchup.split(" or ") if c.strip()]
-
+       
         if len(choices) < 2:
             await message.reply("nigga learn how to use de fukin bot")
             return
 
-        await message.reply(random.choice(choices))
+        canonical = sorted(choices, key=str.lower)
+        
+        key = "who:" + " or ".join(c.lower() for c in canonical)
+        rng = get_rng(key)
+
+        await message.reply(rng.choice(canonical))
         return
     
     if query.startswith("am i cooked"):
+        key = "cooked:" + " ".join(query.split()).lower()
+        rng = get_rng(key)
         responses = [
             "absolutely cooked",
             "medium rare",
@@ -153,7 +184,7 @@ async def on_message(message):
             "yo future more cooked than yo present, and thats sayin something"
         ]
 
-        await message.reply(random.choice(responses))
+        await message.reply(rng.choice(responses))
         return
 
     if query.startswith("no embed perms"):
@@ -187,7 +218,7 @@ async def on_message(message):
 
         return        
 
-    await message.reply("you called?")
+   
 
 keep_alive()
 bot.run(TOKEN, reconnect=True)

@@ -121,7 +121,7 @@ async def on_message(message):
     query = query.strip()
 
     if query.startswith("is this real"):
-        key = "real:" + " ".join(query.split()).lower()
+        key = "real:" + " ".join(message.content.split()).lower()
         rng = get_rng(key)
         responses = [
             "Real.",
